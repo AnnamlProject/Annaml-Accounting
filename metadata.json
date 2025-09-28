@@ -1,0 +1,5 @@
+{
+  "name": "Annaml Accounting System",
+  "description": "A modern, AI-powered web accounting system built with React and Tailwind CSS. It features a dashboard, transaction management with AI categorization, account tracking, and financial reports.",
+  "requestFramePermissions": []
+}
