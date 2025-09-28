@@ -55,6 +55,59 @@ export interface AccountNumberingRule {
   end: number;
 }
 
+export interface AccountClassification {
+  id: number;
+  group: string;
+  name: string;
+  status: 'Aktif' | 'Non-Aktif';
+  description: string;
+}
+
+export enum AccountLevel {
+  HEADER = 'HEADER',
+  GROUP_ACCOUNT = 'GROUP ACCOUNT',
+  ACCOUNT = 'ACCOUNT',
+  SUB_ACCOUNT = 'SUB ACCOUNT'
+}
+
+export interface ChartOfAccount {
+  id: string;
+  kodeAkun: number;
+  namaAkun: string;
+  tipeAkun: string;
+  levelAkun: AccountLevel;
+  klasifikasiAkun: string;
+}
+
+export enum DepartmentStatus {
+    Aktif = 'Aktif',
+    NonAktif = 'Non-Aktif'
+}
+
+export interface Department {
+    id: string;
+    kode: string;
+    deskripsi: string;
+    status: DepartmentStatus;
+}
+
+export interface LinkedAccount {
+  id: string;
+  kode: string; // e.g., 'retained_earnings'
+  namaAkunId: string; // Corresponds to a ChartOfAccount id
+}
+
+export interface Tax {
+  id: string;
+  name: string;
+  taxId: string;
+  isExempt: boolean;
+  isTaxable: boolean;
+  purchaseAccountId: string;
+  salesAccountId: string;
+}
+
+
 export type Page = 
   // Core
   | 'dashboard' 
@@ -81,6 +134,7 @@ export type Page =
   // B. Sales
   | 'linked-account-sales'
   | 'sales-discount'
+  // FIX: Add 'sales-taxes' to the Page type
   | 'sales-taxes'
   | 'payment-method-sales'
   | 'sales-person'

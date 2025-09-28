@@ -32,6 +32,7 @@ const navMenu: NavMenu[] = [
                 { label: 'Yearbook Setting', page: 'yearbook-setting' },
                 { label: 'Account Numbering', page: 'account-numbering' },
                 { label: 'Account Classification', page: 'account-classification' },
+                { label: 'Account List', page: 'account-list' },
                 { label: 'Fiscal Accounts', page: 'fiscal-accounts' },
                 { label: 'Fiscal Accounts Reconciliation', page: 'fiscal-accounts-reconciliation' },
                 { label: 'Departments', page: 'departments' },
@@ -40,7 +41,6 @@ const navMenu: NavMenu[] = [
             ]},
             { title: 'SETUP REPORTS', items: [
                 { label: 'Account Classification List', page: 'account-classification-list' },
-                { label: 'Account List', page: 'account-list' },
                 { label: 'Department List', page: 'department-list' },
             ]},
             { title: 'USERS & ROLES', items: [

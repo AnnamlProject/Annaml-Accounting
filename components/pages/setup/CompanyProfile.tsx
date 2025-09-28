@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Input from '../../ui/Input';
 import Button from '../../ui/Button';
 import FileInput from '../../ui/FileInput';
+import Textarea from '../../ui/Textarea';
 
 type Tab = 'company-data' | 'legal-document';
 
@@ -45,10 +46,7 @@ const CompanyProfile: React.FC = () => {
                             <div>
                                 <Input label="Nama Perusahaan" id="nama-perusahaan" type="text" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Jalan</label>
-                                <textarea id="jalan" rows={3} className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
-                            </div>
+                            <Textarea label="Jalan" id="jalan" rows={3} />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <Input label="Kelurahan" id="kelurahan" type="text" />
                                 <Input label="Kecamatan" id="kecamatan" type="text" />

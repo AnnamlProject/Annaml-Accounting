@@ -66,23 +66,23 @@ const YearbookSetting: React.FC = () => {
             <div className="bg-white p-6 rounded-b-lg shadow-sm border border-t-0 border-slate-200">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-slate-500 uppercase bg-slate-50">
+                        <thead className="text-xs text-slate-800 font-semibold uppercase bg-slate-50">
                             <tr>
-                                <th className="px-6 py-3">#</th>
-                                <th className="px-6 py-3">Tahun</th>
-                                <th className="px-6 py-3">Awal Periode</th>
-                                <th className="px-6 py-3">Akhir Periode</th>
-                                <th className="px-6 py-3">Status</th>
-                                <th className="px-6 py-3">Aksi</th>
+                                <th className="px-6 py-3 text-slate-800">#</th>
+                                <th className="px-6 py-3 text-slate-800">Tahun</th>
+                                <th className="px-6 py-3 text-slate-800">Awal Periode</th>
+                                <th className="px-6 py-3 text-slate-800">Akhir Periode</th>
+                                <th className="px-6 py-3 text-slate-800">Status</th>
+                                <th className="px-6 py-3 text-slate-800">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {yearbooks.map((yb, index) => (
                                 <tr key={yb.id} className="border-b hover:bg-slate-50">
-                                    <td className="px-6 py-4">{index + 1}</td>
+                                    <td className="px-6 py-4 text-slate-800">{index + 1}</td>
                                     <td className="px-6 py-4 font-medium text-slate-900">{yb.year}</td>
-                                    <td className="px-6 py-4">{formatDate(yb.startDate)}</td>
-                                    <td className="px-6 py-4">{formatDate(yb.endDate)}</td>
+                                    <td className="px-6 py-4 text-slate-800">{formatDate(yb.startDate)}</td>
+                                    <td className="px-6 py-4 text-slate-800">{formatDate(yb.endDate)}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusClass(yb.status)}`}>
                                             {yb.status}

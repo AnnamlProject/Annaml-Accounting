@@ -136,7 +136,7 @@ const Transactions: React.FC = () => {
       </Header>
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
         <table className="w-full text-sm text-left text-slate-500">
-          <thead className="text-xs text-slate-700 uppercase bg-slate-50">
+          <thead className="text-xs text-slate-800 uppercase bg-slate-50">
             <tr>
               <th scope="col" className="px-6 py-3">Date</th>
               <th scope="col" className="px-6 py-3">Description</th>
