@@ -7,142 +7,144 @@ import Textarea from '../../ui/Textarea';
 import { useData } from '../../../hooks/useData';
 import { DocumentDuplicateIcon, TrashIcon, PencilIcon, EyeIcon } from '../../icons/Icons';
 
-// Interface untuk data Payment yang disimpan
-interface Payment {
+// Interface untuk data Payment Expense yang disimpan
+interface PaymentExpense {
   id: number;
   fromAccountId: string;
-  vendorId: string;
   chequeNo: string;
   date: string;
-  amount: number;
+  totalAmount: number;
   comment: string;
+  lines: ExpenseLine[];
 }
 
-// Interface untuk setiap baris di dalam tabel pembayaran invoice
-interface PaymentLine {
+// Interface untuk setiap baris di dalam tabel expense
+interface ExpenseLine {
     id: number;
-    dueDate: string;
-    invoiceNo: string;
-    originalAmount: number;
-    amountOwing: number;
-    discountAvailable: number;
-    discountTaken: number;
-    paymentAmount: number;
+    accountId: string;
+    description: string;
+    amount: number;
+    taxId: string;
 }
 
-const Payments: React.FC = () => {
-    const { vendors, chartOfAccounts } = useData();
+const PaymentExpenses: React.FC = () => {
+    const { chartOfAccounts, taxes } = useData();
     const [view, setView] = useState<'list' | 'form'>('list');
-    const [payments, setPayments] = useState<Payment[]>([]);
+    const [payments, setPayments] = useState<PaymentExpense[]>([]);
     
     // State untuk form
     const [fromAccountId, setFromAccountId] = useState('');
-    const [vendorId, setVendorId] = useState('');
     const [chequeNo, setChequeNo] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [lines, setLines] = useState<PaymentLine[]>([]);
     const [comment, setComment] = useState('');
+    const [lines, setLines] = useState<ExpenseLine[]>([
+        { id: Date.now(), accountId: '', description: '', amount: 0, taxId: '' }
+    ]);
 
     const bankAndCashAccounts = useMemo(() => 
         chartOfAccounts.filter(acc => 
             acc.klasifikasiAkun === 'Cash' || acc.klasifikasiAkun === 'Bank'
         ), [chartOfAccounts]);
 
-    const totalPaymentAmount = useMemo(() => {
-        return lines.reduce((total, line) => total + line.paymentAmount, 0);
+    const { subtotal, totalTax, total } = useMemo(() => {
+        const sub = lines.reduce((acc, line) => acc + line.amount, 0);
+        // Implementasi pajak sederhana, asumsi rate dari mock
+        const tax = 0; // Ganti dengan logika pajak jika diperlukan
+        return { subtotal: sub, totalTax: tax, total: sub + tax };
     }, [lines]);
 
     const handleAddNew = () => {
-        // Reset state form sebelum ditampilkan
         setFromAccountId(bankAndCashAccounts.length > 0 ? bankAndCashAccounts[0].id : '');
-        setVendorId('');
         setChequeNo('');
         setDate(new Date().toISOString().split('T')[0]);
         setComment('');
-        setLines([]);
+        setLines([{ id: Date.now(), accountId: '', description: '', amount: 0, taxId: '' }]);
         setView('form');
     }
     const handleCancel = () => setView('list');
 
+    const handleLineChange = (id: number, field: keyof ExpenseLine, value: any) => {
+        setLines(prev => prev.map(line => line.id === id ? { ...line, [field]: value } : line));
+    };
+
+    const addLine = () => {
+        setLines(prev => [...prev, { id: Date.now(), accountId: '', description: '', amount: 0, taxId: '' }]);
+    };
+
+    const removeLine = (id: number) => {
+        setLines(prev => prev.filter(line => line.id !== id));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!fromAccountId || !vendorId || totalPaymentAmount <= 0) {
-            alert("Harap lengkapi From Account, Vendor, dan jumlah pembayaran pada tagihan.");
+        if (!fromAccountId || total <= 0) {
+            alert("Harap lengkapi From Account dan detail pembayaran.");
             return;
         }
         
-        const newPayment: Payment = {
+        const newPayment: PaymentExpense = {
             id: Date.now(),
             fromAccountId,
-            vendorId,
             chequeNo,
             date,
-            amount: totalPaymentAmount,
+            totalAmount: total,
             comment,
+            lines
         };
 
         setPayments(prev => [...prev, newPayment]);
-        alert("Payment berhasil dibuat!");
+        alert("Payment Expense berhasil dibuat!");
         setView('list');
     };
     
     const getAccountName = (id: string) => chartOfAccounts.find(acc => acc.id === id)?.namaAkun || 'N/A';
-    const getVendorName = (id: string) => vendors.find(v => v.id === id)?.name || 'N/A';
     const formatCurrency = (value: number) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 
-    // Tampilan Form
     if (view === 'form') {
         return (
             <div className="p-4 sm:p-6 lg:p-8">
-                <Header title="Create Payment" />
+                <Header title="Create Payment Expense" />
                 <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-6">
-                    {/* Header Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-green-50/50 rounded-lg border">
                         <Select label="From Account *" value={fromAccountId} onChange={e => setFromAccountId(e.target.value)} required>
                             <option value="" disabled>-- Pilih Akun Bank/Kas --</option>
                             {bankAndCashAccounts.map(acc => <option key={acc.id} value={acc.id}>{acc.kodeAkun} - {acc.namaAkun}</option>)}
                         </Select>
-                        <Select label="Pay to the Order of (Vendor) *" value={vendorId} onChange={e => setVendorId(e.target.value)} required>
-                             <option value="" disabled>-- Pilih Vendor --</option>
-                             {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-                        </Select>
-                        <div className="grid grid-cols-2 gap-4">
-                           <Input label="Cheque No." value={chequeNo} onChange={e => setChequeNo(e.target.value)} />
-                           <Input label="Date" type="date" value={date} onChange={e => setDate(e.target.value)} required/>
-                        </div>
+                        <Input label="Cheque No." value={chequeNo} onChange={e => setChequeNo(e.target.value)} />
+                        <Input label="Date" type="date" value={date} onChange={e => setDate(e.target.value)} required/>
                     </div>
 
-                    {/* Dynamic Table for applying payments */}
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead className="text-left text-slate-500 bg-slate-50">
                                 <tr>
-                                    {['Due Date', 'Invoice or Prepayment', 'Original Amount', 'Amount Owing', 'Discount Available', 'Discount Taken', 'Payment Amount'].map(h => <th key={h} className="p-2 font-medium">{h}</th>)}
+                                    {['Acct', 'Description', 'Amount', 'Tax', 'Aksi'].map(h => <th key={h} className="p-2 font-medium">{h}</th>)}
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* Fungsionalitas untuk memuat & mengaplikasikan pembayaran ke invoice akan membutuhkan data invoice. Ini adalah placeholder. */}
-                                <tr>
-                                    <td colSpan={7} className="text-center p-8 text-slate-500">
-                                        Pilih vendor untuk melihat tagihan yang belum dibayar.
-                                    </td>
-                                </tr>
+                                {lines.map(line => (
+                                    <tr key={line.id}>
+                                        <td className="p-1 w-1/4"><Select label="" value={line.accountId} onChange={e => handleLineChange(line.id, 'accountId', e.target.value)}><option value="">Pilih Akun</option>{chartOfAccounts.map(a => <option key={a.id} value={a.id}>{a.kodeAkun} - {a.namaAkun}</option>)}</Select></td>
+                                        <td className="p-1 w-2/4"><Input label="" value={line.description} onChange={e => handleLineChange(line.id, 'description', e.target.value)} /></td>
+                                        <td className="p-1"><Input label="" type="number" value={line.amount} onChange={e => handleLineChange(line.id, 'amount', Number(e.target.value))} /></td>
+                                        <td className="p-1"><Select label="" value={line.taxId} onChange={e => handleLineChange(line.id, 'taxId', e.target.value)}><option value="">None</option>{taxes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</Select></td>
+                                        <td className="p-1"><Button type="button" onClick={() => removeLine(line.id)} className="!p-2 bg-red-500 hover:bg-red-600"><TrashIcon className="w-4 h-4 text-white" /></Button></td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
+                        <Button type="button" variant="secondary" onClick={addLine} className="mt-2">+ Add Line</Button>
                     </div>
                     
-                    {/* Footer and Summary */}
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t items-start">
                         <Textarea label="Comment" value={comment} onChange={e => setComment(e.target.value)} rows={3} />
                          <div className="space-y-2 flex flex-col items-end">
-                            <div className="flex justify-between w-full max-w-xs pt-2 border-t mt-2">
-                                <span className="font-bold text-lg">Total :</span>
-                                <span className="font-bold text-lg">{formatCurrency(totalPaymentAmount)}</span>
-                            </div>
+                             <div className="flex justify-between w-full max-w-xs"><span className="font-semibold">Subtotal :</span><span>{formatCurrency(subtotal)}</span></div>
+                             <div className="flex justify-between w-full max-w-xs"><span className="font-semibold">Tax :</span><span>{formatCurrency(totalTax)}</span></div>
+                             <div className="flex justify-between w-full max-w-xs pt-2 border-t mt-2"><span className="font-bold text-lg">Total :</span><span className="font-bold text-lg">{formatCurrency(total)}</span></div>
                          </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="pt-6 flex justify-end gap-3 border-t">
                         <Button type="button" variant="secondary" onClick={handleCancel}>Cancel</Button>
                         <Button type="submit">Process</Button>
@@ -152,51 +154,37 @@ const Payments: React.FC = () => {
         );
     }
     
-    // Tampilan Daftar
     return (
         <div className="p-4 sm:p-6 lg:p-8">
             <div className="bg-blue-600 rounded-t-lg p-4 flex items-center justify-between">
-                <div className="flex items-center">
-                    <h2 className="text-lg font-semibold text-white">Payment</h2>
-                </div>
+                <div className="flex items-center"><h2 className="text-lg font-semibold text-white">Payment Expenses</h2></div>
                 <div className="flex items-center gap-2">
-                    <Button variant="secondary" className="bg-white/90 text-blue-600 hover:bg-white flex items-center gap-2">
-                        <DocumentDuplicateIcon className="w-4 h-4" /> File
-                    </Button>
-                    <Button onClick={handleAddNew} variant="secondary" className="bg-white/90 text-blue-600 hover:bg-white">
-                        + Add Payment
-                    </Button>
+                    <Button variant="secondary" className="bg-white/90 text-blue-600 hover:bg-white"><DocumentDuplicateIcon className="w-4 h-4 mr-2" /> File</Button>
+                    <Button onClick={handleAddNew} variant="secondary" className="bg-white/90 text-blue-600 hover:bg-white">+ Add Payment Expense</Button>
                 </div>
             </div>
             <div className="bg-white p-6 rounded-b-lg shadow-sm border border-t-0 border-slate-200">
                 {payments.length === 0 ? (
                     <div className="text-center py-16">
-                        <div className="inline-block bg-slate-100 rounded-full p-4">
-                           <svg className="w-10 h-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <h3 className="mt-4 text-lg font-semibold text-slate-800">Belum ada Payment</h3>
-                        <div className="mt-6">
-                            <Button onClick={handleAddNew}>+ Tambah</Button>
-                        </div>
+                        <h3 className="mt-4 text-lg font-semibold text-slate-800">Belum ada Payment Expenses</h3>
+                        <div className="mt-6"><Button onClick={handleAddNew}>+ Tambah</Button></div>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-slate-800 uppercase bg-slate-50">
                                 <tr>
-                                    {['#', 'Payment Method', 'From Account', 'Vendor', 'Payment Date', 'Comment', 'Amount', 'Aksi'].map(h => <th key={h} className="px-6 py-3">{h}</th>)}
+                                    {['#', 'From Account', 'Date', 'Description', 'Amount', 'Aksi'].map(h => <th key={h} className="px-6 py-3">{h}</th>)}
                                 </tr>
                             </thead>
                             <tbody>
                                 {payments.map((p, index) => (
                                     <tr key={p.id} className="border-b hover:bg-slate-50">
                                         <td className="px-6 py-4">{index + 1}</td>
-                                        <td className="px-6 py-4">{p.chequeNo ? `Cheque #${p.chequeNo}` : 'N/A'}</td>
                                         <td className="px-6 py-4">{getAccountName(p.fromAccountId)}</td>
-                                        <td className="px-6 py-4 font-medium">{getVendorName(p.vendorId)}</td>
                                         <td className="px-6 py-4">{p.date}</td>
                                         <td className="px-6 py-4 truncate max-w-xs">{p.comment}</td>
-                                        <td className="px-6 py-4 font-semibold text-right">{formatCurrency(p.amount)}</td>
+                                        <td className="px-6 py-4 font-semibold text-right">{formatCurrency(p.totalAmount)}</td>
                                         <td className="px-6 py-4 flex items-center space-x-3">
                                             <button className="text-blue-500 hover:text-blue-700"><EyeIcon className="w-5 h-5"/></button>
                                             <button className="text-yellow-500 hover:text-yellow-700"><PencilIcon className="w-5 h-5"/></button>
@@ -213,4 +201,4 @@ const Payments: React.FC = () => {
     );
 };
 
-export default Payments;
+export default PaymentExpenses;

@@ -87,6 +87,7 @@ const navMenu: NavMenu[] = [
                 { label: 'Purchase Invoices', page: 'purchase-invoices' },
                 { label: 'Prepayments', page: 'prepayments' },
                 { label: 'Payments', page: 'payments' },
+                { label: 'Payment Expenses', page: 'payment-expenses' },
             ]},
         ] 
     },

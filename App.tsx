@@ -45,6 +45,7 @@ import PurchaseOrders from './components/pages/purchases/PurchaseOrders';
 import PurchaseInvoices from './components/pages/purchases/PurchaseInvoices';
 import Prepayments from './components/pages/purchases/Prepayments';
 import Payments from './components/pages/purchases/Payments';
+import PaymentExpenses from './components/pages/purchases/PaymentExpenses';
 
 // Inventory
 import LinkedAccountInventory from './components/pages/inventory/LinkedAccount';
@@ -126,6 +127,7 @@ const App: React.FC = () => {
       case 'purchase-invoices': return <PurchaseInvoices />;
       case 'prepayments': return <Prepayments />;
       case 'payments': return <Payments />;
+      case 'payment-expenses': return <PaymentExpenses />;
       
       // Inventory
       case 'linked-account-inventory': return <LinkedAccountInventory />;

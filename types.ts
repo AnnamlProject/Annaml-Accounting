@@ -32,6 +32,12 @@ export interface Vendor {
     id: string;
     name: string;
     category: string;
+    kode?: string;
+    contactPerson?: string;
+    alamat?: string;
+    telepon?: string;
+    email?: string;
+    paymentTerms?: string;
 }
 
 export enum YearbookStatus {
@@ -152,6 +158,7 @@ export type Page =
   | 'purchase-invoices'
   | 'prepayments'
   | 'payments'
+  | 'payment-expenses'
   // D. Inventory
   | 'linked-account-inventory'
   | 'service-items'

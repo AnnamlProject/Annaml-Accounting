@@ -17,6 +17,7 @@ interface DataContextProps {
   taxes: Tax[];
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
   addAccount: (account: Omit<Account, 'id'>) => void;
+  addVendor: (vendor: Omit<Vendor, 'id'>) => void;
   addYearbook: (yearbook: Omit<Yearbook, 'id' | 'status'>) => void;
   addAccountNumberingRule: (rules: Omit<AccountNumberingRule, 'id'>[]) => void;
   addDepartment: (department: Omit<Department, 'id'>) => void;
@@ -61,6 +62,17 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const addAccount = useCallback((account: Omit<Account, 'id'>) => {
     setAccounts(prev => [{ ...account, id: new Date().toISOString() }, ...prev]);
+  }, []);
+
+  const addVendor = useCallback((vendor: Omit<Vendor, 'id'>) => {
+    setVendors(prev => {
+        const newVendor: Vendor = {
+            ...vendor,
+            id: `ven${prev.length + 1}`,
+            kode: vendor.kode || `VEN-000${prev.length + 1}`
+        };
+        return [...prev, newVendor];
+    });
   }, []);
   
   const addYearbook = useCallback((yearbook: Omit<Yearbook, 'id' | 'status'>) => {
@@ -125,7 +137,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setTaxes(prev => [...prev, { ...tax, id: `tax-${new Date().getTime()}` }]);
   }, []);
 
-  const value = { accounts, transactions, customers, vendors, yearbooks, accountNumberingRules, accountClassifications, chartOfAccounts, departments, departmentAccountAssignments, linkedAccounts, taxes, addTransaction, addAccount, addYearbook, addAccountNumberingRule, addDepartment, updateDepartmentAssignments, addLinkedAccount, addTax };
+  const value = { accounts, transactions, customers, vendors, yearbooks, accountNumberingRules, accountClassifications, chartOfAccounts, departments, departmentAccountAssignments, linkedAccounts, taxes, addTransaction, addAccount, addVendor, addYearbook, addAccountNumberingRule, addDepartment, updateDepartmentAssignments, addLinkedAccount, addTax };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };
