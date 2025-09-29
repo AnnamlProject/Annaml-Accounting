@@ -123,6 +123,26 @@ export interface ServiceItem {
   expenseAccountId: string;
 }
 
+export interface JournalEntryDetail {
+  id: number;
+  accountId: string;
+  debit: number;
+  credit: number;
+  comment: string;
+  isFiscalCorrection: boolean;
+  fiscalAdjustment?: 'non_tax' | 'pph_final' | 'koreksi_plus' | 'koreksi_minus';
+  fiscalCode?: string;
+}
+
+export interface JournalEntry {
+  id: number;
+  source: string;
+  date: string;
+  comment: string;
+  yearbookId: string; // ID dari periode buku
+  details: JournalEntryDetail[];
+}
+
 
 export type Page = 
   // Core

@@ -1,4 +1,4 @@
-import { Account, Transaction, TransactionType, Customer, Vendor, Yearbook, YearbookStatus, AccountNumberingRule, AccountClassification, ChartOfAccount, AccountLevel, Department, DepartmentStatus, LinkedAccount, Tax, ServiceItem } from '../types';
+import { Account, Transaction, TransactionType, Customer, Vendor, Yearbook, YearbookStatus, AccountNumberingRule, AccountClassification, ChartOfAccount, AccountLevel, Department, DepartmentStatus, LinkedAccount, Tax, ServiceItem, JournalEntry } from '../types';
 
 export const MOCK_ACCOUNTS: Account[] = [
   { id: 'acc1', name: 'Main Checking', type: 'Checking', balance: 5210.55 },
@@ -174,3 +174,5 @@ export const MOCK_LINKED_ACCOUNTS: LinkedAccount[] = [
 export const MOCK_TAXES: Tax[] = [];
 
 export const MOCK_SERVICE_ITEMS: ServiceItem[] = [];
+
+export const MOCK_JOURNAL_ENTRIES: JournalEntry[] = [];
