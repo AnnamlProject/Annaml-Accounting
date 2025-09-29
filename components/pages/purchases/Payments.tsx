@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Header from '../../layout/Header';
 import Button from '../../ui/Button';
 import Input from '../../ui/Input';
@@ -25,8 +25,6 @@ interface PaymentLine {
     invoiceNo: string;
     originalAmount: number;
     amountOwing: number;
-    discountAvailable: number;
-    discountTaken: number;
     paymentAmount: number;
 }
 
@@ -48,6 +46,27 @@ const Payments: React.FC = () => {
             acc.klasifikasiAkun === 'Cash' || acc.klasifikasiAkun === 'Bank'
         ), [chartOfAccounts]);
 
+    // EFEK: Muat data invoice palsu saat vendor dipilih
+    useEffect(() => {
+        if (vendorId) {
+            // Simulasi pengambilan data invoice untuk vendor yang dipilih
+            setLines([
+                { id: 1, dueDate: '2025-09-30', invoiceNo: 'INV-001', originalAmount: 500000, amountOwing: 500000, paymentAmount: 0 },
+                { id: 2, dueDate: '2025-10-15', invoiceNo: 'INV-002', originalAmount: 1250000, amountOwing: 1000000, paymentAmount: 0 },
+            ]);
+        } else {
+            setLines([]);
+        }
+    }, [vendorId]);
+
+    const handleLineChange = (id: number, field: keyof PaymentLine, value: any) => {
+        setLines(prevLines =>
+            prevLines.map(line =>
+                line.id === id ? { ...line, [field]: Number(value) } : line
+            )
+        );
+    };
+
     const totalPaymentAmount = useMemo(() => {
         return lines.reduce((total, line) => total + line.paymentAmount, 0);
     }, [lines]);
@@ -67,7 +86,7 @@ const Payments: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!fromAccountId || !vendorId || totalPaymentAmount <= 0) {
-            alert("Harap lengkapi From Account, Vendor, dan jumlah pembayaran pada tagihan.");
+            alert("Harap lengkapi From Account, Vendor, dan masukkan jumlah pembayaran pada salah satu tagihan.");
             return;
         }
         
@@ -88,7 +107,7 @@ const Payments: React.FC = () => {
     
     const getAccountName = (id: string) => chartOfAccounts.find(acc => acc.id === id)?.namaAkun || 'N/A';
     const getVendorName = (id: string) => vendors.find(v => v.id === id)?.name || 'N/A';
-    const formatCurrency = (value: number) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    const formatCurrency = (value: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
 
     // Tampilan Form
     if (view === 'form') {
@@ -96,13 +115,12 @@ const Payments: React.FC = () => {
             <div className="p-4 sm:p-6 lg:p-8">
                 <Header title="Create Payment" />
                 <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-6">
-                    {/* Header Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-green-50/50 rounded-lg border">
                         <Select label="From Account *" value={fromAccountId} onChange={e => setFromAccountId(e.target.value)} required>
                             <option value="" disabled>-- Pilih Akun Bank/Kas --</option>
                             {bankAndCashAccounts.map(acc => <option key={acc.id} value={acc.id}>{acc.kodeAkun} - {acc.namaAkun}</option>)}
                         </Select>
-                        <Select label="Pay to the Order of (Vendor) *" value={vendorId} onChange={e => setVendorId(e.target.value)} required>
+                        <Select label="Pay to Vendor *" value={vendorId} onChange={e => setVendorId(e.target.value)} required>
                              <option value="" disabled>-- Pilih Vendor --</option>
                              {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
                         </Select>
@@ -112,37 +130,51 @@ const Payments: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Dynamic Table for applying payments */}
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead className="text-left text-slate-500 bg-slate-50">
                                 <tr>
-                                    {['Due Date', 'Invoice or Prepayment', 'Original Amount', 'Amount Owing', 'Discount Available', 'Discount Taken', 'Payment Amount'].map(h => <th key={h} className="p-2 font-medium">{h}</th>)}
+                                    {['Due Date', 'Invoice No.', 'Original Amount', 'Amount Owing', 'Payment Amount'].map(h => <th key={h} className="p-2 font-medium">{h}</th>)}
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* Fungsionalitas untuk memuat & mengaplikasikan pembayaran ke invoice akan membutuhkan data invoice. Ini adalah placeholder. */}
-                                <tr>
-                                    <td colSpan={7} className="text-center p-8 text-slate-500">
-                                        Pilih vendor untuk melihat tagihan yang belum dibayar.
-                                    </td>
-                                </tr>
+                                {lines.length > 0 ? lines.map(line => (
+                                    <tr key={line.id}>
+                                        <td className="p-1">{line.dueDate}</td>
+                                        <td className="p-1">{line.invoiceNo}</td>
+                                        <td className="p-1">{formatCurrency(line.originalAmount)}</td>
+                                        <td className="p-1">{formatCurrency(line.amountOwing)}</td>
+                                        <td className="p-1">
+                                            <Input 
+                                                label="" 
+                                                type="number" 
+                                                value={line.paymentAmount} 
+                                                onChange={(e) => handleLineChange(line.id, 'paymentAmount', e.target.value)} 
+                                                className="text-right"
+                                            />
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan={5} className="text-center p-8 text-slate-500">
+                                            Pilih vendor untuk melihat tagihan yang belum dibayar.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
                     
-                    {/* Footer and Summary */}
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t items-start">
                         <Textarea label="Comment" value={comment} onChange={e => setComment(e.target.value)} rows={3} />
                          <div className="space-y-2 flex flex-col items-end">
                             <div className="flex justify-between w-full max-w-xs pt-2 border-t mt-2">
-                                <span className="font-bold text-lg">Total :</span>
+                                <span className="font-bold text-lg">Total Payment:</span>
                                 <span className="font-bold text-lg">{formatCurrency(totalPaymentAmount)}</span>
                             </div>
                          </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="pt-6 flex justify-end gap-3 border-t">
                         <Button type="button" variant="secondary" onClick={handleCancel}>Cancel</Button>
                         <Button type="submit">Process</Button>

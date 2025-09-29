@@ -98,7 +98,7 @@ const navMenu: NavMenu[] = [
                 { label: 'Linked Account', page: 'linked-account-inventory' },
             ]},
             { title: 'DATA', items: [
-                { label: 'Service Items', page: 'service-items' },
+                { label: 'Service Items', page: 'inventory-and-services' },
             ]},
         ] 
     },

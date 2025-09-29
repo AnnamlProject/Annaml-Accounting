@@ -1,6 +1,6 @@
 import React, { createContext, useState, ReactNode, useCallback } from 'react';
-import { Transaction, Account, TransactionType, Customer, Vendor, Yearbook, YearbookStatus, AccountNumberingRule, AccountClassification, ChartOfAccount, Department, DepartmentStatus, LinkedAccount, Tax } from '../types';
-import { MOCK_ACCOUNTS, MOCK_TRANSACTIONS, MOCK_CUSTOMERS, MOCK_VENDORS, MOCK_YEARBOOKS, MOCK_ACCOUNT_NUMBERING_RULES, MOCK_ACCOUNT_CLASSIFICATIONS, MOCK_CHART_OF_ACCOUNTS, MOCK_DEPARTMENTS, MOCK_DEPARTMENT_ASSIGNMENTS, MOCK_LINKED_ACCOUNTS, MOCK_TAXES } from '../data/mockData';
+import { Transaction, Account, TransactionType, Customer, Vendor, Yearbook, YearbookStatus, AccountNumberingRule, AccountClassification, ChartOfAccount, Department, DepartmentStatus, LinkedAccount, Tax, ServiceItem } from '../types';
+import { MOCK_ACCOUNTS, MOCK_TRANSACTIONS, MOCK_CUSTOMERS, MOCK_VENDORS, MOCK_YEARBOOKS, MOCK_ACCOUNT_NUMBERING_RULES, MOCK_ACCOUNT_CLASSIFICATIONS, MOCK_CHART_OF_ACCOUNTS, MOCK_DEPARTMENTS, MOCK_DEPARTMENT_ASSIGNMENTS, MOCK_LINKED_ACCOUNTS, MOCK_TAXES, MOCK_SERVICE_ITEMS } from '../data/mockData';
 
 interface DataContextProps {
   accounts: Account[];
@@ -15,6 +15,7 @@ interface DataContextProps {
   departmentAccountAssignments: { [key: string]: string[] };
   linkedAccounts: LinkedAccount[];
   taxes: Tax[];
+  serviceItems: ServiceItem[];
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
   addAccount: (account: Omit<Account, 'id'>) => void;
   addVendor: (vendor: Omit<Vendor, 'id'>) => void;
@@ -24,6 +25,7 @@ interface DataContextProps {
   updateDepartmentAssignments: (departmentId: string, accountIds: string[]) => void;
   addLinkedAccount: (linkedAccount: Omit<LinkedAccount, 'id'>) => void;
   addTax: (tax: Omit<Tax, 'id'>) => void;
+  addServiceItem: (item: Omit<ServiceItem, 'id'>) => void;
 }
 
 export const DataContext = createContext<DataContextProps | undefined>(undefined);
@@ -41,6 +43,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [departmentAccountAssignments, setDepartmentAccountAssignments] = useState<{ [key: string]: string[] }>(MOCK_DEPARTMENT_ASSIGNMENTS);
   const [linkedAccounts, setLinkedAccounts] = useState<LinkedAccount[]>(MOCK_LINKED_ACCOUNTS);
   const [taxes, setTaxes] = useState<Tax[]>(MOCK_TAXES);
+  const [serviceItems, setServiceItems] = useState<ServiceItem[]>(MOCK_SERVICE_ITEMS);
 
 
   const addTransaction = useCallback((transaction: Omit<Transaction, 'id'>) => {
@@ -137,7 +140,17 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setTaxes(prev => [...prev, { ...tax, id: `tax-${new Date().getTime()}` }]);
   }, []);
 
-  const value = { accounts, transactions, customers, vendors, yearbooks, accountNumberingRules, accountClassifications, chartOfAccounts, departments, departmentAccountAssignments, linkedAccounts, taxes, addTransaction, addAccount, addVendor, addYearbook, addAccountNumberingRule, addDepartment, updateDepartmentAssignments, addLinkedAccount, addTax };
+  const addServiceItem = useCallback((item: Omit<ServiceItem, 'id'>) => {
+    setServiceItems(prev => {
+        const newItem: ServiceItem = {
+            ...item,
+            id: `srv-${new Date().getTime()}`
+        };
+        return [...prev, newItem];
+    });
+  }, []);
+
+  const value = { accounts, transactions, customers, vendors, yearbooks, accountNumberingRules, accountClassifications, chartOfAccounts, departments, departmentAccountAssignments, linkedAccounts, taxes, serviceItems, addTransaction, addAccount, addVendor, addYearbook, addAccountNumberingRule, addDepartment, updateDepartmentAssignments, addLinkedAccount, addTax, addServiceItem };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };

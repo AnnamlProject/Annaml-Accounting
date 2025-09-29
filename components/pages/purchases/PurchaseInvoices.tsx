@@ -6,7 +6,7 @@ import Select from '../../ui/Select';
 import Textarea from '../../ui/Textarea';
 import Checkbox from '../../ui/Checkbox';
 import { useData } from '../../../hooks/useData';
-import { DocumentDuplicateIcon, TrashIcon } from '../../icons/Icons';
+import { DocumentDuplicateIcon, EyeIcon, PencilIcon, TrashIcon } from '../../icons/Icons';
 
 // Interface for each line item in the invoice
 interface InvoiceItemLine {
@@ -29,29 +29,21 @@ interface PurchaseInvoice {
     vendorId: string;
     invoiceNumber: string;
     invoiceDate: string;
-    items: InvoiceItemLine[];
-    // add other properties as needed
+    total: number;
 }
 
 // Local mock data
-const MOCK_ITEMS = [
-  { id: 'item-1', name: 'Jasa Konsultasi', price: 1000000 },
-  { id: 'item-2', name: 'Sewa Peralatan', price: 500000 },
-  { id: 'item-3', name: 'ATK Kantor', price: 150000 },
-];
 const MOCK_PROJECTS = [{id: 'proj-1', name: 'Proyek Internal'}, {id: 'proj-2', name: 'Proyek Klien A'}];
-const MOCK_LOCATIONS = [{id: 'loc-1', name: 'Primary Location'}, {id: 'loc-2', name: 'Warehouse B'}];
-
 
 const PurchaseInvoices: React.FC = () => {
-    const { vendors, chartOfAccounts, taxes } = useData();
+    const { vendors, chartOfAccounts } = useData();
     const [view, setView] = useState<'list' | 'form'>('list');
     const [invoices, setInvoices] = useState<PurchaseInvoice[]>([]);
     
     // State for the form
     const [vendorId, setVendorId] = useState('');
     const [invoiceReceived, setInvoiceReceived] = useState(true);
-    const [invoiceNo, setInvoiceNo] = useState('');
+    const [invoiceNo, setInvoiceNo] = useState(`INV-${Date.now()}`);
     const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
     const [quoteNo, setQuoteNo] = useState('');
     const [items, setItems] = useState<InvoiceItemLine[]>([
@@ -61,7 +53,18 @@ const PurchaseInvoices: React.FC = () => {
     const [earlyPaymentTerms, setEarlyPaymentTerms] = useState('');
 
 
-    const handleAddNew = () => setView('form');
+    const handleAddNew = () => {
+        // Reset form state
+        setVendorId('');
+        setInvoiceReceived(true);
+        setInvoiceNo(`INV-${Date.now()}`);
+        setInvoiceDate(new Date().toISOString().split('T')[0]);
+        setQuoteNo('');
+        setItems([{ id: Date.now(), itemNumber: '', quantity: 1, order: 1, backOrder: 0, unit: 'pcs', description: '', price: 0, tax: 0, accountId: '', projects: '' }]);
+        setFreight(0);
+        setEarlyPaymentTerms('');
+        setView('form');
+    };
     const handleCancel = () => setView('list');
 
     const handleItemChange = (id: number, field: keyof InvoiceItemLine, value: any) => {
@@ -84,13 +87,20 @@ const PurchaseInvoices: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Form submission logic
-        console.log("Submitting Invoice:", { vendorId, invoiceNo, items });
-        alert("Purchase Invoice Created! (check data in console)");
+        const newInvoice: PurchaseInvoice = {
+            id: Date.now(),
+            vendorId,
+            invoiceNumber: invoiceNo,
+            invoiceDate,
+            total,
+        };
+        setInvoices(prev => [...prev, newInvoice]);
+        alert("Purchase Invoice Created!");
         setView('list');
     };
 
-    const formatCurrency = (value: number) => new Intl.NumberFormat('id-ID').format(value);
+    const formatCurrency = (value: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+    const getVendorName = (id: string) => vendors.find(v => v.id === id)?.name || 'N/A';
 
 
     if (view === 'form') {
@@ -119,9 +129,21 @@ const PurchaseInvoices: React.FC = () => {
                     <div>
                         <div className="overflow-x-auto">
                            <table className="w-full text-sm">
-                                <thead className="text-left text-slate-500">
+                                <thead className="text-left text-slate-500 bg-slate-50">
                                     <tr>
-                                        {['Item Number', 'Quantity', 'Order', 'Back Order', 'Unit', 'Description', 'Price', 'Tax', 'Tax Amount', 'Amount', 'Account', 'Projects', 'Aksi'].map(h => <th key={h} className="pb-2 font-medium pr-2">{h}</th>)}
+                                        <th className="p-2 font-medium min-w-[120px]">Item Number</th>
+                                        <th className="p-2 font-medium min-w-[80px]">Quantity</th>
+                                        <th className="p-2 font-medium min-w-[80px]">Order</th>
+                                        <th className="p-2 font-medium min-w-[80px]">Back Order</th>
+                                        <th className="p-2 font-medium min-w-[80px]">Unit</th>
+                                        <th className="p-2 font-medium min-w-[250px]">Description</th>
+                                        <th className="p-2 font-medium min-w-[120px]">Price</th>
+                                        <th className="p-2 font-medium min-w-[120px]">Tax</th>
+                                        <th className="p-2 font-medium min-w-[120px]">Tax Amount</th>
+                                        <th className="p-2 font-medium min-w-[120px]">Amount</th>
+                                        <th className="p-2 font-medium min-w-[200px]">Account</th>
+                                        <th className="p-2 font-medium min-w-[200px]">Projects</th>
+                                        <th className="p-2 font-medium min-w-[50px] text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -129,20 +151,20 @@ const PurchaseInvoices: React.FC = () => {
                                         const amount = item.quantity * item.price;
                                         const taxAmount = amount * (item.tax / 100);
                                         return (
-                                            <tr key={item.id}>
-                                                <td className="pr-2 py-1"><Input label="" value={item.itemNumber} onChange={e => handleItemChange(item.id, 'itemNumber', e.target.value)} /></td>
-                                                <td className="pr-2 py-1"><Input label="" type="number" value={item.quantity} onChange={e => handleItemChange(item.id, 'quantity', Number(e.target.value))} /></td>
-                                                <td className="pr-2 py-1"><Input label="" type="number" value={item.order} onChange={e => handleItemChange(item.id, 'order', Number(e.target.value))} /></td>
-                                                <td className="pr-2 py-1"><Input label="" type="number" value={item.backOrder} onChange={e => handleItemChange(item.id, 'backOrder', Number(e.target.value))} /></td>
-                                                <td className="pr-2 py-1"><Input label="" value={item.unit} onChange={e => handleItemChange(item.id, 'unit', e.target.value)} /></td>
-                                                <td className="pr-2 py-1"><Input label="" value={item.description} onChange={e => handleItemChange(item.id, 'description', e.target.value)} /></td>
-                                                <td className="pr-2 py-1"><Input label="" type="number" value={item.price} onChange={e => handleItemChange(item.id, 'price', Number(e.target.value))} /></td>
-                                                <td className="pr-2 py-1"><Select label="" value={item.tax} onChange={e => handleItemChange(item.id, 'tax', Number(e.target.value))}><option value={0}>0%</option></Select></td>
-                                                <td className="pr-2 py-1"><Input label="" value={formatCurrency(taxAmount)} disabled /></td>
-                                                <td className="pr-2 py-1"><Input label="" value={formatCurrency(amount)} disabled /></td>
-                                                <td className="pr-2 py-1"><Select label="" value={item.accountId} onChange={e => handleItemChange(item.id, 'accountId', e.target.value)}><option value="">Pilih Akun</option>{chartOfAccounts.map(a => <option key={a.id} value={a.id}>{a.namaAkun}</option>)}</Select></td>
-                                                <td className="pr-2 py-1"><Select label="" value={item.projects} onChange={e => handleItemChange(item.id, 'projects', e.target.value)}><option value="">Pilih Proyek</option>{MOCK_PROJECTS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</Select></td>
-                                                <td className="py-1"><Button type="button" onClick={() => removeItem(item.id)} className="!p-2 bg-red-500 hover:bg-red-600"><TrashIcon className="w-4 h-4 text-white" /></Button></td>
+                                            <tr key={item.id} className="border-b border-slate-200">
+                                                <td className="p-1 align-middle"><Input className="!py-1" label="" value={item.itemNumber} onChange={e => handleItemChange(item.id, 'itemNumber', e.target.value)} /></td>
+                                                <td className="p-1 align-middle"><Input className="!py-1 text-right" label="" type="number" value={item.quantity} onChange={e => handleItemChange(item.id, 'quantity', Number(e.target.value))} /></td>
+                                                <td className="p-1 align-middle"><Input className="!py-1 text-right" label="" type="number" value={item.order} onChange={e => handleItemChange(item.id, 'order', Number(e.target.value))} /></td>
+                                                <td className="p-1 align-middle"><Input className="!py-1 text-right" label="" type="number" value={item.backOrder} onChange={e => handleItemChange(item.id, 'backOrder', Number(e.target.value))} /></td>
+                                                <td className="p-1 align-middle"><Input className="!py-1" label="" value={item.unit} onChange={e => handleItemChange(item.id, 'unit', e.target.value)} /></td>
+                                                <td className="p-1 align-middle"><Input className="!py-1" label="" value={item.description} onChange={e => handleItemChange(item.id, 'description', e.target.value)} /></td>
+                                                <td className="p-1 align-middle"><Input className="!py-1 text-right" label="" type="number" value={item.price} onChange={e => handleItemChange(item.id, 'price', Number(e.target.value))} /></td>
+                                                <td className="p-1 align-middle"><Select className="!py-1" label="" value={item.tax} onChange={e => handleItemChange(item.id, 'tax', Number(e.target.value))}><option value={0}>0%</option><option value={11}>PPN 11%</option></Select></td>
+                                                <td className="p-1 align-middle"><Input className="!py-1 text-right" label="" value={formatCurrency(taxAmount)} disabled /></td>
+                                                <td className="p-1 align-middle"><Input className="!py-1 text-right" label="" value={formatCurrency(amount)} disabled /></td>
+                                                <td className="p-1 align-middle"><Select className="!py-1" label="" value={item.accountId} onChange={e => handleItemChange(item.id, 'accountId', e.target.value)}><option value="">Pilih Akun</option>{chartOfAccounts.map(a => <option key={a.id} value={a.id}>{a.namaAkun}</option>)}</Select></td>
+                                                <td className="p-1 align-middle"><Select className="!py-1" label="" value={item.projects} onChange={e => handleItemChange(item.id, 'projects', e.target.value)}><option value="">Pilih Proyek</option>{MOCK_PROJECTS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</Select></td>
+                                                <td className="p-1 align-middle text-center"><Button type="button" onClick={() => removeItem(item.id)} className="!p-2 bg-red-500 hover:bg-red-600"><TrashIcon className="w-4 h-4 text-white" /></Button></td>
                                             </tr>
                                         )
                                     })}
@@ -193,7 +215,7 @@ const PurchaseInvoices: React.FC = () => {
                         <div className="inline-block bg-slate-100 rounded-full p-4">
                             <svg className="w-10 h-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
-                        <h3 className="mt-4 text-lg font-semibold text-slate-800">Belum ada purchase Invoice</h3>
+                        <h3 className="mt-4 text-lg font-semibold text-slate-800">Belum ada Purchase Invoice</h3>
                         <div className="mt-6">
                             <Button onClick={handleAddNew}>+ Tambah</Button>
                         </div>
@@ -203,11 +225,24 @@ const PurchaseInvoices: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-slate-800 uppercase bg-slate-50">
                                 <tr>
-                                    {['#', 'Invoice Number', 'Invoice Order', 'Shipping Date', 'Customer', 'Payment Method', 'Shipping Address', 'Freight', 'Early Payment Terms', 'Messages', 'Aksi'].map(h => <th key={h} className="px-6 py-3">{h}</th>)}
+                                    {['#', 'Invoice Number', 'Vendor', 'Date', 'Total', 'Aksi'].map(h => <th key={h} className="px-6 py-3">{h}</th>)}
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* Rows will be rendered here */}
+                                {invoices.map((invoice, index) => (
+                                    <tr key={invoice.id} className="border-b hover:bg-slate-50">
+                                        <td className="px-6 py-4">{index + 1}</td>
+                                        <td className="px-6 py-4 font-medium">{invoice.invoiceNumber}</td>
+                                        <td className="px-6 py-4">{getVendorName(invoice.vendorId)}</td>
+                                        <td className="px-6 py-4">{invoice.invoiceDate}</td>
+                                        <td className="px-6 py-4 font-semibold text-right">{formatCurrency(invoice.total)}</td>
+                                        <td className="px-6 py-4 flex items-center justify-center space-x-3">
+                                            <button className="text-blue-500 hover:text-blue-700"><EyeIcon className="w-5 h-5"/></button>
+                                            <button className="text-yellow-500 hover:text-yellow-700"><PencilIcon className="w-5 h-5"/></button>
+                                            <button className="text-red-500 hover:text-red-700"><TrashIcon className="w-5 h-5"/></button>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>

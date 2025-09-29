@@ -113,6 +113,16 @@ export interface Tax {
   salesAccountId: string;
 }
 
+export interface ServiceItem {
+  id: string;
+  itemNumber: string;
+  itemDescription: string;
+  type: 'Service';
+  unitOfMeasure: string;
+  revenueAccountId: string;
+  expenseAccountId: string;
+}
+
 
 export type Page = 
   // Core
@@ -161,7 +171,7 @@ export type Page =
   | 'payment-expenses'
   // D. Inventory
   | 'linked-account-inventory'
-  | 'service-items'
+  | 'inventory-and-services'
   // E. General Journals
   | 'create-general-journals'
   | 'fiscal-correction-tickbox'

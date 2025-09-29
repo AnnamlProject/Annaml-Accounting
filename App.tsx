@@ -131,7 +131,7 @@ const App: React.FC = () => {
       
       // Inventory
       case 'linked-account-inventory': return <LinkedAccountInventory />;
-      case 'service-items': return <ServiceItems />;
+      case 'inventory-and-services': return <ServiceItems />;
       
       // General Journals
       case 'create-general-journals': return <CreateGeneralJournal />;

@@ -1,4 +1,4 @@
-import { Account, Transaction, TransactionType, Customer, Vendor, Yearbook, YearbookStatus, AccountNumberingRule, AccountClassification, ChartOfAccount, AccountLevel, Department, DepartmentStatus, LinkedAccount, Tax } from '../types';
+import { Account, Transaction, TransactionType, Customer, Vendor, Yearbook, YearbookStatus, AccountNumberingRule, AccountClassification, ChartOfAccount, AccountLevel, Department, DepartmentStatus, LinkedAccount, Tax, ServiceItem } from '../types';
 
 export const MOCK_ACCOUNTS: Account[] = [
   { id: 'acc1', name: 'Main Checking', type: 'Checking', balance: 5210.55 },
@@ -140,6 +140,8 @@ export const MOCK_CHART_OF_ACCOUNTS: ChartOfAccount[] = [
     { id: 'coa-22', kodeAkun: 1103001, namaAkun: 'PIUTANG QRIS', tipeAkun: 'Aset', levelAkun: AccountLevel.SUB_ACCOUNT, klasifikasiAkun: '-' },
     { id: 'coa-23', kodeAkun: 1103051, namaAkun: 'CAD PENGHAPUSAN PIUTANG', tipeAkun: 'Aset', levelAkun: AccountLevel.SUB_ACCOUNT, klasifikasiAkun: '-' },
     { id: 'coa-24', kodeAkun: 3102000, namaAkun: 'LABA DITAHAN', tipeAkun: 'Ekuitas', levelAkun: AccountLevel.ACCOUNT, klasifikasiAkun: '-' },
+    { id: 'coa-25', kodeAkun: 4101001, namaAkun: 'PENDAPATAN JASA', tipeAkun: 'Pendapatan', levelAkun: AccountLevel.SUB_ACCOUNT, klasifikasiAkun: 'Operating Revenue' },
+    { id: 'coa-26', kodeAkun: 5101001, namaAkun: 'BEBAN POKOK PENJUALAN', tipeAkun: 'Beban', levelAkun: AccountLevel.SUB_ACCOUNT, klasifikasiAkun: 'Cost of Goods Sold' },
 ];
 
 export const MOCK_DEPARTMENTS: Department[] = [
@@ -170,3 +172,5 @@ export const MOCK_LINKED_ACCOUNTS: LinkedAccount[] = [
 ];
 
 export const MOCK_TAXES: Tax[] = [];
+
+export const MOCK_SERVICE_ITEMS: ServiceItem[] = [];
