@@ -53,8 +53,6 @@ import ServiceItems from './components/pages/inventory/ServiceItems';
 
 // General Journals
 import CreateGeneralJournal from './components/pages/generalJournal/CreateGeneralJournal';
-import FiscalCorrectionTickbox from './components/pages/generalJournal/FiscalCorrectionTickbox';
-import FiscalCorrectionOption from './components/pages/generalJournal/FiscalCorrectionOption';
 import GeneralJournalLists from './components/pages/generalJournal/GeneralJournalLists';
 import EditGeneralJournals from './components/pages/generalJournal/EditGeneralJournals';
 import EditFiscalCorrection from './components/pages/generalJournal/EditFiscalCorrection';
@@ -135,8 +133,6 @@ const App: React.FC = () => {
       
       // General Journals
       case 'create-general-journals': return <CreateGeneralJournal />;
-      case 'fiscal-correction-tickbox': return <FiscalCorrectionTickbox />;
-      case 'fiscal-correction-option': return <FiscalCorrectionOption />;
       case 'general-journal-lists': return <GeneralJournalLists />;
       case 'edit-general-journals': return <EditGeneralJournals />;
       case 'edit-fiscal-correction': return <EditFiscalCorrection />;

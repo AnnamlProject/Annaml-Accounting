@@ -194,8 +194,6 @@ export type Page =
   | 'inventory-and-services'
   // E. General Journals
   | 'create-general-journals'
-  | 'fiscal-correction-tickbox'
-  | 'fiscal-correction-option'
   | 'general-journal-lists'
   | 'edit-general-journals'
   | 'edit-fiscal-correction'

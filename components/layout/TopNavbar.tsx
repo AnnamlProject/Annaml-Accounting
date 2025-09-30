@@ -111,8 +111,6 @@ const navMenu: NavMenu[] = [
         groups: [
             { title: 'CREATE GENERAL JOURNALS', items: [
                 { label: 'Create General Journals', page: 'create-general-journals' },
-                { label: 'Fiscal Correction Tickbox', page: 'fiscal-correction-tickbox' },
-                { label: 'Fiscal Correction Option', page: 'fiscal-correction-option' },
             ]},
             { title: 'GENERAL JOURNAL REPORTS', items: [
                 { label: 'General Journal Lists', page: 'general-journal-lists' },
